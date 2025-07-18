@@ -59,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
       await axios.post(webhookUrl, payload, {
         headers: {
           'Content-Type': 'application/json',
-          ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          ...(authToken && { Authorization: authToken }),
         },
       });
 

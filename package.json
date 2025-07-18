@@ -1,0 +1,57 @@
+{
+    "name": "devstash",
+    "displayName": "DevStash",
+    "description": "Quickly save code snippets, commands, and notes to your personal knowledge vault.",
+    "publisher": "devstash",
+    "version": "0.1.0",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "devstash.saveSelection",
+                "title": "Save to DevStash"
+            }
+        ],
+        "configuration": {
+            "title": "DevStash",
+            "properties": {
+                "devstash.webhookUrl": {
+                    "type": "string",
+                    "default": "",
+                    "description": "The webhook URL to send your stashed code snippets to."
+                },
+                "devstash.authToken": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Optional bearer token for authenticating with your webhook endpoint."
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.80.0",
+        "@types/node": "20.x",
+        "@types/uuid": "^9.0.8",
+        "@typescript-eslint/eslint-plugin": "^7.11.0",
+        "@typescript-eslint/parser": "^7.11.0",
+        "eslint": "^8.57.0",
+        "typescript": "^5.4.5"
+    },
+    "dependencies": {
+        "axios": "^1.7.2",
+        "uuid": "^9.0.1"
+    }
+}

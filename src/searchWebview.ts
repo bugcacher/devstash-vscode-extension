@@ -122,12 +122,14 @@ export class SearchWebviewProvider {
                 color: var(--vscode-foreground);
                 background-color: var(--vscode-editor-background);
                 line-height: 1.5;
+                text-align: left;
             }
 
             .search-container {
                 max-width: 800px;
                 margin: 0 auto;
                 padding: 20px;
+                text-align: left;
             }
 
             .search-header {
@@ -290,6 +292,7 @@ export class SearchWebviewProvider {
                 background-color: var(--vscode-editor-background);
                 cursor: pointer;
                 transition: all 0.2s ease;
+                text-align: left;
             }
 
             .search-result-item:hover {
@@ -319,14 +322,22 @@ export class SearchWebviewProvider {
                 background-color: var(--vscode-textCodeBlock-background);
                 border: 1px solid var(--vscode-textBlockQuote-border);
                 border-radius: 4px;
-                padding: 12px;
+                padding: 8px 12px;
                 font-family: var(--vscode-editor-font-family);
                 font-size: 13px;
-                line-height: 1.4;
+                line-height: 1.3;
                 overflow-x: auto;
+                overflow-y: hidden;
                 white-space: pre-wrap;
                 word-break: break-word;
                 position: relative;
+                max-height: 120px;
+                text-align: left;
+            }
+
+            .result-content.truncated {
+                max-height: 80px;
+                overflow: hidden;
             }
 
             .result-content code {
@@ -334,6 +345,9 @@ export class SearchWebviewProvider {
                 padding: 0;
                 font-family: inherit;
                 font-size: inherit;
+                text-align: left;
+                display: block;
+                width: 100%;
             }
 
             .content-ellipsis {
@@ -629,8 +643,8 @@ export class SearchWebviewProvider {
                     resultsCount.textContent = \`\${response.nbHits} result\${response.nbHits !== 1 ? 's' : ''} found\`;
                     
                     searchResults.innerHTML = response.hits.map(hit => {
-                        const truncatedContent = truncateContent(hit.content, 300);
-                        const isContentTruncated = hit.content.length > 300;
+                        const truncatedContent = truncateContent(hit.content, 150);
+                        const isContentTruncated = hit.content.length > 150;
                         
                         return \`
                             <div class="search-result-item" data-object-id="\${hit.objectID}">
@@ -697,7 +711,7 @@ export class SearchWebviewProvider {
                                 this.textContent = 'Show Less';
                             } else {
                                 // Collapse
-                                const truncatedContent = truncateContent(fullContent, 300);
+                                const truncatedContent = truncateContent(fullContent, 150);
                                 contentDiv.innerHTML = \`<code class="language-\${contentDiv.closest('.search-result-item').querySelector('.result-language').textContent}">\${escapeHtml(truncatedContent)}</code><span class="content-ellipsis">...</span>\`;
                                 contentDiv.classList.add('truncated');
                                 this.textContent = 'Show More';

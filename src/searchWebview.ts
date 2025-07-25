@@ -305,6 +305,21 @@ export class SearchWebviewProvider {
                 font-weight: 600;
                 margin-bottom: 8px;
                 color: var(--vscode-titleBar-activeForeground);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .type-chip {
+                padding: 2px 6px;
+                background-color: var(--vscode-textCodeBlock-background);
+                color: var(--vscode-descriptionForeground);
+                border: 1px solid var(--vscode-textBlockQuote-border);
+                border-radius: 8px;
+                font-size: 10px;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .result-note {
@@ -793,7 +808,10 @@ export class SearchWebviewProvider {
                         
                         return \`
                             <div class="search-result-item" data-object-id="\${hit.objectID}">
-                                <div class="result-title">\${escapeHtml(hit.title)}</div>
+                                <div class="result-title">
+                                    <span>\${escapeHtml(hit.title)}</span>
+                                    <span class="type-chip">\${escapeHtml(hit.type || 'unknown')}</span>
+                                </div>
                                 \${hit.note ? \`<div class="result-note">\${escapeHtml(hit.note)}</div>\` : ''}
                                 <div class="result-content-container">
                                     <div class="result-content \${isContentTruncated ? 'truncated' : ''}" data-full-content="\${escapeHtml(hit.content)}">

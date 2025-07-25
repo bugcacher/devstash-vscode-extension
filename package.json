@@ -2,8 +2,24 @@
     "name": "devstash",
     "displayName": "DevStash",
     "description": "Quickly save code snippets, commands, and notes to your personal knowledge vault.",
-    "publisher": "devstash",
+    "publisher": "bugcacher",
     "version": "0.1.0",
+    "icon": "assets/icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bugcacher/devstash-vscode-extension.git"
+    },
+    "bugs": {
+        "url": "https://github.com/bugcacher/devstash-vscode-extension/issues"
+    },
+    "homepage": "https://github.com/bugcacher/devstash-vscode-extension",
+    "keywords": [
+        "snippets",
+        "code",
+        "search",
+        "vault",
+        "stash"
+    ],
     "engines": {
         "vscode": "^1.80.0"
     },
@@ -15,11 +31,24 @@
         "commands": [
             {
                 "command": "devstash.saveSelection",
-                "title": "Save to DevStash"
+                "title": "Devstash: Save"
             },
             {
                 "command": "devstash.search",
-                "title": "Search DevStash"
+                "title": "Devstash: Search"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "devstash.saveSelection",
+                "key": "ctrl+alt+s",
+                "mac": "cmd+alt+s",
+                "when": "editorHasSelection"
+            },
+            {
+                "command": "devstash.search",
+                "key": "ctrl+alt+d",
+                "mac": "cmd+alt+d"
             }
         ],
         "configuration": {

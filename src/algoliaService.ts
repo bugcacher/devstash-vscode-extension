@@ -98,20 +98,11 @@ export class AlgoliaService {
             };
 
         } catch (error) {
-            // Handle different types of errors
-            if (error instanceof Error) {
-                if (error.message.includes('401') || error.message.includes('403')) {
-                    throw new Error('Authentication failed. Please check your Algolia API key.');
-                } else if (error.message.includes('404')) {
-                    throw new Error('Algolia index not found. Please check your index name.');
-                } else if (error.message.includes('network') || error.message.includes('timeout')) {
-                    throw new Error('Network error occurred while searching. Please check your connection.');
-                } else {
-                    throw new Error(`Search failed: ${error.message}`);
-                }
-            } else {
-                throw new Error('An unknown error occurred during search');
-            }
+            const errorMessage = error && typeof error === 'object' && 'message' in error 
+                ? String(error.message)
+                : 'An unknown error occurred during search';
+            
+            throw new Error(`Search failed: ${errorMessage}`);
         }
     }
 

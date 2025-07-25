@@ -16,6 +16,10 @@
             {
                 "command": "devstash.saveSelection",
                 "title": "Save to DevStash"
+            },
+            {
+                "command": "devstash.search",
+                "title": "Search DevStash"
             }
         ],
         "configuration": {
@@ -30,6 +34,26 @@
                     "type": "string",
                     "default": "",
                     "description": "Optional bearer token for authenticating with your webhook endpoint."
+                },
+                "devstash.algoliaAppId": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Your Algolia Application ID."
+                },
+                "devstash.algoliaApiKey": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Your Algolia Search-Only API Key."
+                },
+                "devstash.algoliaIndexName": {
+                    "type": "string",
+                    "default": "",
+                    "description": "The name of your Algolia index."
+                },
+                "devstash.showTagFilter": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show the tag filter in the DevStash search view."
                 }
             }
         }
@@ -52,6 +76,7 @@
     },
     "dependencies": {
         "axios": "^1.7.2",
-        "uuid": "^9.0.1"
+        "uuid": "^9.0.1",
+        "algoliasearch": "^4.20.0"
     }
 }

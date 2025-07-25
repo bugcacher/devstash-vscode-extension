@@ -49,11 +49,6 @@
                     "type": "string",
                     "default": "",
                     "description": "The name of your Algolia index."
-                },
-                "devstash.showTagFilter": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Show the tag filter in the DevStash search view."
                 }
             }
         }

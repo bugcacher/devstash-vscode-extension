@@ -178,6 +178,56 @@ export function activate(context: vscode.ExtensionContext) {
                 );
               }
               break;
+
+            case 'deleteResult':
+              try {
+                console.log('Delete message received in extension:', message);
+                const objectId: string = message.objectId;
+                const webhookUrl = config.get<string>('webhookUrl');
+                
+                console.log('Webhook URL:', webhookUrl);
+                console.log('Object ID to delete:', objectId);
+                
+                if (!webhookUrl) {
+                  throw new Error('Webhook URL is not configured');
+                }
+
+                const authToken = config.get<string>('authToken');
+                console.log('Making DELETE request to:', webhookUrl);
+                await axios.delete(webhookUrl, {
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...(authToken && { Authorization: authToken }),
+                  },
+                  data: { objectId }
+                });
+                console.log('DELETE request successful');
+                
+                // Send success message back to webview
+                panel.webview.postMessage({
+                  type: 'deleteSuccess',
+                  objectId: objectId
+                });
+                
+                // Show success notification
+                vscode.window.showInformationMessage('Item deleted successfully!');
+              } catch (error) {
+                console.error('Delete error:', error);
+                
+                // Send error message back to webview
+                panel.webview.postMessage({
+                  type: 'deleteError',
+                  objectId: message.objectId,
+                  error: error instanceof Error ? error.message : 'Failed to delete item'
+                });
+                
+                // Show error notification
+                vscode.window.showErrorMessage(
+                  'Failed to delete item: ' + 
+                  (error instanceof Error ? error.message : 'Unknown error')
+                );
+              }
+              break;
           }
         },
         undefined,

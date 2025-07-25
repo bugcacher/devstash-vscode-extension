@@ -405,6 +405,104 @@ export class SearchWebviewProvider {
                 font-weight: 500;
             }
 
+            .result-actions {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .delete-btn {
+                background: none;
+                border: 1px solid var(--vscode-errorForeground);
+                color: var(--vscode-errorForeground);
+                padding: 4px 8px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .delete-btn:hover {
+                background-color: var(--vscode-errorForeground);
+                color: var(--vscode-editor-background);
+            }
+
+            .delete-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .confirmation-dialog {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            }
+
+            .confirmation-content {
+                background-color: var(--vscode-editor-background);
+                border: 1px solid var(--vscode-panel-border);
+                border-radius: 6px;
+                padding: 20px;
+                max-width: 400px;
+                width: 90%;
+            }
+
+            .confirmation-title {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 12px;
+                color: var(--vscode-titleBar-activeForeground);
+            }
+
+            .confirmation-message {
+                margin-bottom: 20px;
+                color: var(--vscode-foreground);
+                line-height: 1.4;
+            }
+
+            .confirmation-buttons {
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+            }
+
+            .confirmation-btn {
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                border: 1px solid var(--vscode-button-border);
+                transition: background-color 0.2s ease;
+            }
+
+            .confirmation-btn.primary {
+                background-color: var(--vscode-button-background);
+                color: var(--vscode-button-foreground);
+            }
+
+            .confirmation-btn.primary:hover {
+                background-color: var(--vscode-button-hoverBackground);
+            }
+
+            .confirmation-btn.secondary {
+                background-color: var(--vscode-button-secondaryBackground);
+                color: var(--vscode-button-secondaryForeground);
+            }
+
+            .confirmation-btn.secondary:hover {
+                background-color: var(--vscode-button-secondaryHoverBackground);
+            }
+
             .error-message {
                 padding: 20px;
                 border: 1px solid var(--vscode-inputValidation-errorBorder);
@@ -571,6 +669,56 @@ export class SearchWebviewProvider {
                     errorMessage.style.display = 'none';
                 }
 
+                // Show debug message (temporary)
+                function showDebug(message) {
+                    console.log('DEBUG:', message);
+                    // Temporarily show in error area but don't stop loading
+                    errorText.textContent = 'DEBUG: ' + message;
+                    errorMessage.style.display = 'block';
+                    setTimeout(() => {
+                        errorMessage.style.display = 'none';
+                    }, 3000);
+                }
+
+                // Show custom confirmation dialog
+                function showConfirmation(message, onConfirm, onCancel) {
+                    const dialog = document.createElement('div');
+                    dialog.className = 'confirmation-dialog';
+                    dialog.innerHTML = \`
+                        <div class="confirmation-content">
+                            <div class="confirmation-title">Confirm Delete</div>
+                            <div class="confirmation-message">\${message}</div>
+                            <div class="confirmation-buttons">
+                                <button class="confirmation-btn secondary" id="cancelBtn">Cancel</button>
+                                <button class="confirmation-btn primary" id="confirmBtn">Delete</button>
+                            </div>
+                        </div>
+                    \`;
+
+                    document.body.appendChild(dialog);
+
+                    const confirmBtn = dialog.querySelector('#confirmBtn');
+                    const cancelBtn = dialog.querySelector('#cancelBtn');
+
+                    confirmBtn.addEventListener('click', () => {
+                        document.body.removeChild(dialog);
+                        onConfirm();
+                    });
+
+                    cancelBtn.addEventListener('click', () => {
+                        document.body.removeChild(dialog);
+                        if (onCancel) onCancel();
+                    });
+
+                    // Close on background click
+                    dialog.addEventListener('click', (e) => {
+                        if (e.target === dialog) {
+                            document.body.removeChild(dialog);
+                            if (onCancel) onCancel();
+                        }
+                    });
+                }
+
                 // Update filter display
                 function updateFilterDisplay() {
                     if (currentFilters.length > 0) {
@@ -623,6 +771,14 @@ export class SearchWebviewProvider {
                         case 'copyError':
                             showError('Failed to copy content to clipboard: ' + message.error);
                             break;
+                        case 'deleteSuccess':
+                            showDebug('Delete success received from extension');
+                            handleDeleteSuccess(message.objectId);
+                            break;
+                        case 'deleteError':
+                            showDebug('Delete error received from extension: ' + message.error);
+                            handleDeleteError(message.objectId, message.error);
+                            break;
                     }
                 });
 
@@ -663,7 +819,12 @@ export class SearchWebviewProvider {
                                             <span class="tag-chip" data-tag="\${escapeHtml(tag)}">\${escapeHtml(tag)}</span>
                                         \`).join('')}
                                     </div>
-                                    <div class="result-language">\${escapeHtml(hit.language)}</div>
+                                    <div class="result-actions">
+                                        <div class="result-language">\${escapeHtml(hit.language)}</div>
+                                        <button class="delete-btn" data-object-id="\${hit.objectID}" data-title="\${escapeHtml(hit.title || 'Untitled')}" type="button">
+                                            🗑️ Delete
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="copy-feedback" style="display: none;">
                                     <span class="copy-success">✓ Copied to clipboard!</span>
@@ -675,11 +836,13 @@ export class SearchWebviewProvider {
                     // Add click handlers for results
                     searchResults.querySelectorAll('.search-result-item').forEach(item => {
                         item.addEventListener('click', function(e) {
-                            // Don't trigger copy if clicking on expand button or tag chip
+                            // Don't trigger copy if clicking on expand button, tag chip, or delete button
                             if (e.target.classList.contains('expand-content-btn') || 
                                 e.target.classList.contains('tag-chip') ||
+                                e.target.classList.contains('delete-btn') ||
                                 e.target.closest('.expand-content-btn') ||
-                                e.target.closest('.tag-chip')) {
+                                e.target.closest('.tag-chip') ||
+                                e.target.closest('.delete-btn')) {
                                 return;
                             }
                             
@@ -736,6 +899,41 @@ export class SearchWebviewProvider {
                             }
                         });
                     });
+
+                    // Add click handlers for delete buttons
+                    const deleteButtons = searchResults.querySelectorAll('.delete-btn');
+                    
+                    deleteButtons.forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const objectId = this.getAttribute('data-object-id');
+                            const title = this.getAttribute('data-title') || 'this item';
+                            const buttonRef = this;
+                            
+                            showDebug(\`Delete clicked for \${title} (ID: \${objectId})\`);
+                            
+                            showConfirmation(
+                                \`Are you sure you want to delete "\${title}"?\`,
+                                () => {
+                                    showDebug('User confirmed deletion');
+                                    
+                                    // Disable button during deletion
+                                    buttonRef.disabled = true;
+                                    buttonRef.textContent = 'Deleting...';
+                                    
+                                    showDebug('Sending delete message to extension...');
+                                    
+                                    vscode.postMessage({
+                                        type: 'deleteResult',
+                                        objectId: objectId
+                                    });
+                                },
+                                () => {
+                                    showDebug('User cancelled deletion');
+                                }
+                            );
+                        });
+                    });
                 }
 
                 // Display no results
@@ -784,6 +982,40 @@ export class SearchWebviewProvider {
                             feedback.style.display = 'none';
                         }, 2000);
                     }
+                }
+
+                // Handle delete success
+                function handleDeleteSuccess(objectId) {
+                    const resultItem = searchResults.querySelector(\`[data-object-id="\${objectId}"]\`);
+                    if (resultItem) {
+                        // Fade out and remove the item
+                        resultItem.style.transition = 'opacity 0.3s ease';
+                        resultItem.style.opacity = '0.5';
+                        
+                        setTimeout(() => {
+                            resultItem.remove();
+                            
+                            // Update results count
+                            const remainingItems = searchResults.querySelectorAll('.search-result-item').length;
+                            if (remainingItems === 0) {
+                                displayNoResults();
+                            } else {
+                                resultsCount.textContent = \`\${remainingItems} result\${remainingItems !== 1 ? 's' : ''} found\`;
+                            }
+                        }, 300);
+                    }
+                }
+
+                // Handle delete error
+                function handleDeleteError(objectId, error) {
+                    const deleteBtn = searchResults.querySelector(\`[data-object-id="\${objectId}"].delete-btn\`);
+                    if (deleteBtn) {
+                        // Re-enable button and restore text
+                        deleteBtn.disabled = false;
+                        deleteBtn.innerHTML = '🗑️ Delete';
+                    }
+                    
+                    showError('Failed to delete item: ' + error);
                 }
             })();
         `;

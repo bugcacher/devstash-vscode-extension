@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     try {
-      // Show a single input box for optional tags.
+      // Show input box for optional tags
       const tagInput = await vscode.window.showInputBox({
         prompt: 'Add comma-separated tags (optional)',
         placeHolder: 'e.g., react, api, sql',
@@ -48,7 +48,21 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
+      // Show input box for optional note
+      const noteInput = await vscode.window.showInputBox({
+        prompt: 'Add a note (optional)',
+        placeHolder: 'e.g., Kubernetes command to connect to the dev k8s cluster',
+        title: 'Save to DevStash',
+      });
+
+      // If the user presses 'Escape' or clicks away, noteInput will be undefined.
+      if (noteInput === undefined) {
+        // Silently cancel the operation as requested.
+        return;
+      }
+
       const userTags = tagInput ? tagInput.split(',').map(t => t.trim()).filter(Boolean) : [];
+      const userNote = noteInput || '';
 
       const payload: DevStashPayload = {
         id: uuidv4(),
@@ -56,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
         content: selection,
         language: editor.document.languageId,
         tags: userTags,
-        note: '', // TODO: Add note input
+        note: userNote,
         createdAt: new Date().toISOString(),
       };
 

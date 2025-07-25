@@ -669,16 +669,7 @@ export class SearchWebviewProvider {
                     errorMessage.style.display = 'none';
                 }
 
-                // Show debug message (temporary)
-                function showDebug(message) {
-                    console.log('DEBUG:', message);
-                    // Temporarily show in error area but don't stop loading
-                    errorText.textContent = 'DEBUG: ' + message;
-                    errorMessage.style.display = 'block';
-                    setTimeout(() => {
-                        errorMessage.style.display = 'none';
-                    }, 3000);
-                }
+
 
                 // Show custom confirmation dialog
                 function showConfirmation(message, onConfirm, onCancel) {
@@ -772,11 +763,9 @@ export class SearchWebviewProvider {
                             showError('Failed to copy content to clipboard: ' + message.error);
                             break;
                         case 'deleteSuccess':
-                            showDebug('Delete success received from extension');
                             handleDeleteSuccess(message.objectId);
                             break;
                         case 'deleteError':
-                            showDebug('Delete error received from extension: ' + message.error);
                             handleDeleteError(message.objectId, message.error);
                             break;
                     }
@@ -901,35 +890,24 @@ export class SearchWebviewProvider {
                     });
 
                     // Add click handlers for delete buttons
-                    const deleteButtons = searchResults.querySelectorAll('.delete-btn');
-                    
-                    deleteButtons.forEach(btn => {
+                    searchResults.querySelectorAll('.delete-btn').forEach(btn => {
                         btn.addEventListener('click', function(e) {
                             e.stopPropagation();
                             const objectId = this.getAttribute('data-object-id');
                             const title = this.getAttribute('data-title') || 'this item';
                             const buttonRef = this;
                             
-                            showDebug(\`Delete clicked for \${title} (ID: \${objectId})\`);
-                            
                             showConfirmation(
                                 \`Are you sure you want to delete "\${title}"?\`,
                                 () => {
-                                    showDebug('User confirmed deletion');
-                                    
                                     // Disable button during deletion
                                     buttonRef.disabled = true;
                                     buttonRef.textContent = 'Deleting...';
-                                    
-                                    showDebug('Sending delete message to extension...');
                                     
                                     vscode.postMessage({
                                         type: 'deleteResult',
                                         objectId: objectId
                                     });
-                                },
-                                () => {
-                                    showDebug('User cancelled deletion');
                                 }
                             );
                         });

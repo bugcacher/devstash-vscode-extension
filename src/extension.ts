@@ -181,19 +181,14 @@ export function activate(context: vscode.ExtensionContext) {
 
             case 'deleteResult':
               try {
-                console.log('Delete message received in extension:', message);
                 const objectId: string = message.objectId;
                 const webhookUrl = config.get<string>('webhookUrl');
-                
-                console.log('Webhook URL:', webhookUrl);
-                console.log('Object ID to delete:', objectId);
                 
                 if (!webhookUrl) {
                   throw new Error('Webhook URL is not configured');
                 }
 
                 const authToken = config.get<string>('authToken');
-                console.log('Making DELETE request to:', webhookUrl);
                 await axios.delete(webhookUrl, {
                   headers: {
                     'Content-Type': 'application/json',
@@ -201,7 +196,6 @@ export function activate(context: vscode.ExtensionContext) {
                   },
                   data: { objectId }
                 });
-                console.log('DELETE request successful');
                 
                 // Send success message back to webview
                 panel.webview.postMessage({

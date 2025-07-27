@@ -342,11 +342,11 @@ export class SearchWebviewProvider {
                 font-size: 13px;
                 line-height: 1.3;
                 overflow-x: auto;
-                overflow-y: hidden;
+                overflow-y: auto;
                 white-space: pre-wrap;
                 word-break: break-word;
                 position: relative;
-                max-height: 120px;
+                max-height: 200px;
                 text-align: left;
             }
 

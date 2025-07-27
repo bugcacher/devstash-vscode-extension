@@ -3,7 +3,7 @@
     "displayName": "DevStash",
     "description": "Quickly save code snippets, commands, and notes to your personal knowledge vault.",
     "publisher": "bugcacher",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "icon": "assets/icon.png",
     "repository": {
         "type": "git",
